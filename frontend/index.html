@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>Local AI · Financial AI Service</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./">
+          <span class="brand-mark">↗</span>
+          <span><strong>FinSight</strong><small>Financial AI Service</small></span>
+        </a>
+        <div class="connection"><span id="connectionDot" class="dot dot-muted"></span><span id="connectionText">Chưa kết nối</span></div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div>
+            <p class="eyebrow">LOCAL AI WORKSPACE</p>
+            <h1>Đánh giá và huấn luyện mô hình</h1>
+            <p class="hero-copy">So sánh nhiều thuật toán trên cùng một Dataset, sau đó chọn mô hình phù hợp để huấn luyện chính thức.</p>
+          </div>
+          <label class="backend-url">Backend URL<input id="backendUrl" type="url" value="http://localhost:8000" aria-label="Địa chỉ Backend" /></label>
+        </section>
+
+        <nav class="stepper" aria-label="Tiến trình Local AI">
+          <button class="step active" data-step="1"><span>01</span><b>Cấu hình</b><small>Dataset & mô hình</small></button>
+          <span class="step-line"></span>
+          <button class="step" data-step="2"><span>02</span><b>Đánh giá</b><small>So sánh kết quả</small></button>
+          <span class="step-line"></span>
+          <button class="step" data-step="3"><span>03</span><b>Huấn luyện</b><small>Lưu model chính thức</small></button>
+        </nav>
+
+        <div id="globalMessage" class="message hidden" role="alert"></div>
+
+        <section id="step1" class="step-panel">
+          <div class="section-heading"><div><p class="eyebrow">BƯỚC 01</p><h2>Cấu hình đánh giá</h2></div><span class="hint">Các trường có dấu * là bắt buộc</span></div>
+
+          <div class="card dataset-card">
+            <div class="card-title"><span class="icon">▣</span><div><h3>Dataset</h3><p>Chọn dữ liệu đã có hoặc tạo một Dataset mới để đánh giá.</p></div></div>
+            <div class="choice-tabs" role="tablist">
+              <button class="choice active" data-dataset-mode="existing">Dataset có sẵn</button>
+              <button class="choice" data-dataset-mode="new">Tạo Dataset mới</button>
+            </div>
+            <div id="existingDatasetPanel" class="dataset-mode">
+              <label>Dataset <span>*</span><select id="existingDataset"><option value="">Đang tải danh sách...</option></select></label>
+              <button id="reloadDatasets" class="button secondary small">↻ Làm mới</button>
+            </div>
+            <div id="newDatasetPanel" class="dataset-mode hidden">
+              <div class="form-grid two">
+                <label>Tên Dataset <span>*</span><input id="newDatasetName" placeholder="Ví dụ: vn30_quarterly_2024" /></label>
+                <label>Builder <span>*</span><select id="builderName"></select></label>
+                <label>Mã cổ phiếu <span>*</span><input id="tickers" placeholder="VCB, FPT, HPG" /><small>Phân cách các mã bằng dấu phẩy.</small></label>
+                <div class="date-grid"><label>Ngày bắt đầu <span>*</span><input id="startDate" type="date" /></label><label>Ngày kết thúc <span>*</span><input id="endDate" type="date" /></label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-columns">
+            <div class="card">
+              <div class="card-title"><span class="icon">⇄</span><div><h3>Chia dữ liệu</h3><p>Chọn chiến lược phù hợp với dữ liệu theo thời gian.</p></div></div>
+              <label>Phương pháp <span>*</span><select id="splitStrategy"></select></label>
+              <div id="splitParameters" class="parameter-box"></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">◈</span><div><h3>Metrics đánh giá</h3><p>Chọn một hoặc nhiều chỉ số để so sánh.</p></div></div>
+              <div id="metrics" class="check-grid"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">✦</span><div><h3>Thuật toán</h3><p>Có thể chọn nhiều thuật toán. Cấu hình trống sẽ dùng giá trị mặc định của Backend.</p></div></div>
+            <div id="algorithms" class="algorithm-grid"></div>
+          </div>
+          <div class="action-row"><button id="evaluateButton" class="button primary">Chạy đánh giá <span>→</span></button></div>
+        </section>
+
+        <section id="step2" class="step-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow">BƯỚC 02</p><h2>Kết quả đánh giá</h2></div><button id="backToConfig" class="button secondary">← Chỉnh sửa cấu hình</button></div>
+          <div id="evaluationSummary" class="summary-grid"></div>
+          <div id="evaluationStatus" class="message hidden"></div>
+          <div class="card results-card"><div class="card-title"><span class="icon">▤</span><div><h3>So sánh thuật toán</h3><p>Chọn các thuật toán thành công để huấn luyện chính thức. Cấu hình được giữ nguyên cho bước huấn luyện.</p></div></div><div class="table-wrap"><table id="resultsTable"></table></div></div>
+          <div class="action-row"><button id="trainButton" class="button primary" disabled>Huấn luyện thuật toán đã chọn <span>→</span></button></div>
+        </section>
+
+        <section id="step3" class="step-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow">BƯỚC 03</p><h2>Huấn luyện chính thức</h2></div><button id="backToResults" class="button secondary">← Xem lại kết quả</button></div>
+          <div id="trainingSummary" class="training-summary"></div>
+          <div id="trainingStatus" class="message hidden"></div>
+          <div class="card"><div class="card-title"><span class="icon">◉</span><div><h3>Kết quả lưu model</h3><p>Backend sẽ tạo model mới trên toàn bộ Dataset hợp lệ.</p></div></div><div id="trainingResults" class="training-results"><div class="empty-state">Chưa bắt đầu huấn luyện.</div></div></div>
+          <div class="action-row"><button id="restartButton" class="button secondary">Bắt đầu luồng mới</button></div>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
